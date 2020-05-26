@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+    namespace: example
+    labels:
+        app: generatepins-service
+    name: generatepins-service
+spec:
+    ports:
+        - name: generatepins-backend
+          port: 80
+          targetPort: 8000
+    selector:
+        app: generatepins-backend
+    type: NodePort

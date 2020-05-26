@@ -1,0 +1,15 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+    name: generatepins-backend-ingress
+    namespace: example
+spec:
+    rules:
+        - host: generatepins.example.local
+          http:
+            paths:
+              - backend:
+                  serviceName: generatepins-service
+                  servicePort: 80
+                path: /
