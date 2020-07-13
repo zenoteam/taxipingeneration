@@ -4,7 +4,6 @@ Test the Generatepin operations
 from unittest.mock import ANY
 import http.client
 from freezegun import freeze_time
-import time
 from faker import Faker
 fake = Faker()
 
@@ -14,6 +13,7 @@ def test_create_pin(client):
     new_pin = {
         'username': fake.name(),
         'phone_number': fake.text(13),
+        'email': 'tonystark2@gmail.com'
     }
     response = client.post('/api/genpin/', data=new_pin)
     result = response.json
@@ -33,6 +33,7 @@ def test_checkpin(client):
     new_pin = {
         'username': fake.name(),
         'phone_number': fake.text(13),
+        'email': 'tonystark2@gmail.com'
     }
     response = client.post('/api/genpin/', data=new_pin)
     result = response.json
@@ -84,6 +85,7 @@ def test_wrong_pin(client):
     new_pin = {
             'username': fake.name(),
             'phone_number': fake.text(13),
+            'email': 'tonystark2@mail.com'
         }
     # result = ''
 
@@ -98,4 +100,63 @@ def test_wrong_pin(client):
 
     response = client.post('/api/checkpin/', data=check_pin)
     # result = response.json
+    assert http.client.UNAUTHORIZED == response.status_code
+
+
+def test_marked_used_pin(client):
+    new_pin = {
+        'username': fake.name(),
+        'phone_number': fake.text(13),
+        'email': 'tonystark2@mail.com'
+    }
+    response = client.post('/api/genpin/', data=new_pin)
+    result = response.json
+
+    assert http.client.CREATED == response.status_code
+
+    check_pin = {
+        'username': new_pin['username'],
+        'pin': result['pin']
+    }
+
+    response = client.post('/api/checkpin/', data=check_pin)
+    result2 = response.json
+    assert http.client.OK == response.status_code
+
+    expected = {'result': True}
+    assert result2 == expected
+
+    response = client.post('/api/used/', data=check_pin)
+    result = response.json
+    assert http.client.OK == response.status_code
+
+    expected = {'result': 'Marked as Used'}
+    assert result == expected
+
+
+def test_used_pin(client):
+    new_pin = {
+        'username': fake.name(),
+        'phone_number': fake.text(13),
+        'email': 'tonystark2@mail.com'
+    }
+    response = client.post('/api/genpin/', data=new_pin)
+    result = response.json
+
+    assert http.client.CREATED == response.status_code
+
+    check_pin = {
+        'username': new_pin['username'],
+        'pin': result['pin']
+    }
+
+    response = client.post('/api/used/', data=check_pin)
+    result2 = response.json
+    assert http.client.OK == response.status_code
+
+    expected = {'result': 'Marked as Used'}
+    assert result2 == expected
+
+    response = client.post('/api/checkpin/', data=check_pin)
+    result = response.json
     assert http.client.UNAUTHORIZED == response.status_code
