@@ -60,16 +60,23 @@ class GenPin(Resource):
 
         phone_num = args['phone_number']
 
-        # email = args['email']
+        email = args['email']
 
         db.session.add(user)
         db.session.commit()
-
-        data = {
-            'username': username,
-            'recieverNo': phone_num,
-            'pin': pin
-        }
+        if email:
+            data = {
+                'username': username,
+                'recieverNo': phone_num,
+                'pin': pin,
+                'recieverEmail': email
+            }
+        else:
+            data = {
+                'username': username,
+                'recieverNo': phone_num,
+                'pin': pin
+            }
 
         requests.post(url=SEND_PIN_MSG_URL, data=data)
         result = api_namespace.marshal(user, genpin_model)

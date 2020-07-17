@@ -51,7 +51,7 @@ services:
                 # These values should be in sync with environment
                 # for development. If you change them, you'll
                 # need to rebuild the container
-                - POSTGRES_DB=thoughts
+                - POSTGRES_DB=generatepins
                 - POSTGRES_USER=postgres
                 - POSTGRES_PASSWORD=somepassword
                 - POSTGRES_PORT=5432
@@ -67,7 +67,7 @@ services:
                 # These values should be in sync with environment
                 # for development. If you change them, you'll
                 # need to rebuild the container
-                - POSTGRES_DB=thoughts
+                - POSTGRES_DB=generatepins
                 - POSTGRES_USER=postgres
                 - POSTGRES_PASSWORD=somepassword
                 - POSTGRES_PORT=5432
