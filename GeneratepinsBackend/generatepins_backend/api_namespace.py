@@ -9,6 +9,7 @@ from generatepins_backend.pin_generator import gen_digits
 api_namespace = Namespace('api', description='API operations')
 
 SEND_PIN_MSG_URL = "http://165.22.116.11:7058/api/messages/genpin/"
+ADD_PIN = "http://165.22.116.11:7062/api/addpin/"
 
 # Input and output formats for Generatepins
 
@@ -81,6 +82,15 @@ class GenPin(Resource):
         requests.post(url=SEND_PIN_MSG_URL, data=data)
         result = api_namespace.marshal(user, genpin_model)
 
+        data = {
+            'admin': username,
+            'phoneNumber': phone_num,
+            'pin': pin
+        }
+        requests.post(url=ADD_PIN, data=data)
+
+        result = api_namespace.marshal(user, genpin_model)
+
         return result, http.client.CREATED
 
 
@@ -130,6 +140,7 @@ class UsedPin(Resource):
         user = (GeneratepinModel
                 .query
                 .filter(GeneratepinModel.username == args['username'])
+                .filter(GeneratepinModel.pin == args['pin'])
                 .one())
         # Turn Pin to used
         user.used = True
