@@ -10,11 +10,11 @@ if __name__ == '__main__':
     # Create some test data
     test_data = [
         # username, timestamp, text
-        ('bruce', "1111", datetime.now()),
-        ('stephen', "1111", datetime.now()),
+        ('bruce', "1111", datetime.now(), 'drake'),
+        ('stephen', "1111", datetime.now(), 'john'),
     ]
-    for username, pin, expiry_time in test_data:
-        user = GeneratepinModel(username=username, pin=pin,
+    for username, pin, expiry_time, admin in test_data:
+        user = GeneratepinModel(username=username, pin=pin, admin=admin,
                                 expiry_time=expiry_time)
         application.db.session.add(user)
 

@@ -10,6 +10,8 @@ api_namespace = Namespace('api', description='API operations')
 
 SEND_PIN_MSG_URL = "http://165.22.116.11:7058/api/messages/genpin/"
 ADD_PIN = "http://165.22.116.11:7062/api/addpin/"
+CONFIRM_URL = "http://165.22.116.11:7042/confirm/"
+
 
 # Input and output formats for Generatepins
 
@@ -18,10 +20,13 @@ checkpin_parser.add_argument('username', type=str, required=True,
                              help='username')
 checkpin_parser.add_argument('pin', type=str, required=True,
                              help='The Pin sent to user')
-
+checkpin_parser.add_argument('otp', type=bool, required=False,
+                             help='indicates if it is am otp gen')
 
 genpin_parser = api_namespace.parser()
 genpin_parser.add_argument('username', type=str, required=True,
+                           help='username')
+genpin_parser.add_argument('admin', type=str, required=True,
                            help='username')
 genpin_parser.add_argument('phone_number', type=str, required=True,
                            help='user phone number')
@@ -30,6 +35,7 @@ genpin_parser.add_argument('email', type=str, required=False,
 
 model = {
     'id': fields.Integer(),
+    'admin': fields.String(),
     'username': fields.String(),
     'expiry_time': fields.DateTime(),
     'pin': fields.String()
@@ -52,9 +58,11 @@ class GenPin(Resource):
         pin = gen_digits()
         expiry_time = datetime.utcnow() + timedelta(minutes=10)
         username = args['username']
+        admin = args['admin']
 
         user = GeneratepinModel(
             username=username,
+            admin=admin,
             pin=pin,
             expiry_time=expiry_time
         )
@@ -82,15 +90,6 @@ class GenPin(Resource):
         requests.post(url=SEND_PIN_MSG_URL, data=data)
         result = api_namespace.marshal(user, genpin_model)
 
-        data = {
-            'admin': username,
-            'phoneNumber': phone_num,
-            'pin': pin
-        }
-        requests.post(url=ADD_PIN, data=data)
-
-        result = api_namespace.marshal(user, genpin_model)
-
         return result, http.client.CREATED
 
 
@@ -108,13 +107,14 @@ class CheckPin(Resource):
         # Search for the user
         user = (GeneratepinModel
                 .query
-                .filter(GeneratepinModel.username == args['username'])
+                .filter(GeneratepinModel.admin == args['username'])
+                .order_by(GeneratepinModel.expiry_time.desc())
                 .first())
         if not user:
             return '', http.client.UNAUTHORIZED
 
         if user.pin != args['pin']:
-            return '', http.client.UNAUTHORIZED
+            return '', http.client.TOO_MANY_REQUESTS
 
         if user.expiry_time < datetime.utcnow():
             return {'result': False}, http.client.UNAUTHORIZED
@@ -122,30 +122,20 @@ class CheckPin(Resource):
         if user.used:
             return '', http.client.UNAUTHORIZED
 
-        return {'result': True}, http.client.OK
+        if args['otp']:
+            data = {
+                'usernamemain': user.username
+            }
+            r = requests.put(url=CONFIRM_URL, data=data)
+            if r.status_code != http.client.OK:
+                return '', http.client.INTERNAL_SERVER_ERROR
 
-
-@api_namespace.route('/used/')
-class UsedPin(Resource):
-
-    @api_namespace.doc('Authenticates User provided Pin')
-    @api_namespace.expect(checkpin_parser)
-    def post(self):
-        '''
-        Authenticates the Pin
-        '''
-        args = checkpin_parser.parse_args()
-
-        # Search for the user
-        user = (GeneratepinModel
-                .query
-                .filter(GeneratepinModel.username == args['username'])
-                .filter(GeneratepinModel.pin == args['pin'])
-                .one())
         # Turn Pin to used
         user.used = True
 
         db.session.add(user)
         db.session.commit()
 
-        return {'result': 'Marked as Used'}, http.client.OK
+        result = api_namespace.marshal(user, genpin_model)
+
+        return result, http.client.OK

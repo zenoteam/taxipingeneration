@@ -12,6 +12,7 @@ fake = Faker()
 def test_create_pin(client):
     new_pin = {
         'username': fake.name(),
+        'admin': fake.name(),
         'phone_number': fake.text(13),
         'email': 'tonystark2@gmail.com'
     }
@@ -23,6 +24,7 @@ def test_create_pin(client):
     expected = {
         'id': ANY,
         'username': new_pin['username'],
+        'admin': new_pin['admin'],
         'expiry_time': '2019-05-07T13:57:34',
         'pin': ANY
     }
@@ -32,6 +34,7 @@ def test_create_pin(client):
 def test_checkpin(client):
     new_pin = {
         'username': fake.name(),
+        'admin': fake.name(),
         'phone_number': fake.text(13),
         'email': 'tonystark2@gmail.com'
     }
@@ -41,7 +44,7 @@ def test_checkpin(client):
     assert http.client.CREATED == response.status_code
 
     check_pin = {
-        'username': new_pin['username'],
+        'username': new_pin['admin'],
         'pin': result['pin']
     }
 
@@ -49,8 +52,8 @@ def test_checkpin(client):
     result = response.json
     assert http.client.OK == response.status_code
 
-    expected = {'result': True}
-    assert result == expected
+    expected = new_pin['username']
+    assert result['username'] == expected
 
 
 '''
@@ -85,6 +88,7 @@ def test_wrong_pin(client):
     new_pin = {
             'username': fake.name(),
             'phone_number': fake.text(13),
+            'admin': fake.name(),
             'email': 'tonystark2@mail.com'
         }
     # result = ''
@@ -94,7 +98,7 @@ def test_wrong_pin(client):
     assert http.client.CREATED == response.status_code
 
     check_pin = {
-        'username': new_pin['username'],
+        'username': new_pin['admin'],
         'pin': '00000'
     }
 
@@ -103,9 +107,10 @@ def test_wrong_pin(client):
     assert http.client.UNAUTHORIZED == response.status_code
 
 
-def test_marked_used_pin(client):
+def test_check_used_pin(client):
     new_pin = {
         'username': fake.name(),
+        'admin': fake.name(),
         'phone_number': fake.text(13),
         'email': 'tonystark2@mail.com'
     }
@@ -115,47 +120,16 @@ def test_marked_used_pin(client):
     assert http.client.CREATED == response.status_code
 
     check_pin = {
-        'username': new_pin['username'],
+        'username': new_pin['admin'],
         'pin': result['pin']
     }
 
     response = client.post('/api/checkpin/', data=check_pin)
-    result2 = response.json
-    assert http.client.OK == response.status_code
-
-    expected = {'result': True}
-    assert result2 == expected
-
-    response = client.post('/api/used/', data=check_pin)
     result = response.json
     assert http.client.OK == response.status_code
 
-    expected = {'result': 'Marked as Used'}
-    assert result == expected
-
-
-def test_used_pin(client):
-    new_pin = {
-        'username': fake.name(),
-        'phone_number': fake.text(13),
-        'email': 'tonystark2@mail.com'
-    }
-    response = client.post('/api/genpin/', data=new_pin)
-    result = response.json
-
-    assert http.client.CREATED == response.status_code
-
-    check_pin = {
-        'username': new_pin['username'],
-        'pin': result['pin']
-    }
-
-    response = client.post('/api/used/', data=check_pin)
-    result2 = response.json
-    assert http.client.OK == response.status_code
-
-    expected = {'result': 'Marked as Used'}
-    assert result2 == expected
+    expected = new_pin['username']
+    assert result['username'] == expected
 
     response = client.post('/api/checkpin/', data=check_pin)
     result = response.json
