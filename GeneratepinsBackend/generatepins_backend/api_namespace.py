@@ -10,7 +10,7 @@ api_namespace = Namespace('api', description='API operations')
 
 SEND_PIN_MSG_URL = "http://165.22.116.11:7058/api/messages/genpin/"
 ADD_PIN = "http://165.22.116.11:7062/api/addpin/"
-CONFIRM_URL = "http://165.22.116.11:7042/confirm/"
+CONFIRM_URL = "http://165.22.116.11:7042/api/confirm/"
 
 
 # Input and output formats for Generatepins
