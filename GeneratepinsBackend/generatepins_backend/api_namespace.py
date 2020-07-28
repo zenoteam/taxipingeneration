@@ -9,9 +9,6 @@ from generatepins_backend.pin_generator import gen_digits
 api_namespace = Namespace('api', description='API operations')
 
 SEND_PIN_MSG_URL = "http://165.22.116.11:7058/api/messages/genpin/"
-ADD_PIN = "http://165.22.116.11:7062/api/addpin/"
-CONFIRM_URL = "http://165.22.116.11:7042/api/confirm/"
-
 
 # Input and output formats for Generatepins
 
@@ -20,8 +17,6 @@ checkpin_parser.add_argument('username', type=str, required=True,
                              help='username')
 checkpin_parser.add_argument('pin', type=str, required=True,
                              help='The Pin sent to user')
-checkpin_parser.add_argument('otp', type=bool, required=False,
-                             help='indicates if it is am otp gen')
 
 genpin_parser = api_namespace.parser()
 genpin_parser.add_argument('username', type=str, required=True,
@@ -121,14 +116,6 @@ class CheckPin(Resource):
 
         if user.used:
             return '', http.client.UNAUTHORIZED
-
-        if args['otp']:
-            data = {
-                'usernamemain': user.username
-            }
-            r = requests.put(url=CONFIRM_URL, data=data)
-            if r.status_code != http.client.OK:
-                return '', http.client.INTERNAL_SERVER_ERROR
 
         # Turn Pin to used
         user.used = True
