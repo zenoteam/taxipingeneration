@@ -130,7 +130,7 @@ def test_bad_request(client):
     assert http.client.BAD_REQUEST == response.status_code
 
 
-def test_bad_request(client):
+def test_multiple_request(client):
     new_pin = {
         'username': fake.name(),
         'phone_number': fake.text(13),
