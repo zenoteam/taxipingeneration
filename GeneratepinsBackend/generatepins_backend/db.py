@@ -8,7 +8,7 @@ if DATABASE_ENGINE == 'SQLITE':
     dir_path = Path(os.path.dirname(os.path.realpath(__file__)))
     path = dir_path / '..'
 
-    # Database initialisation
+    # Database initialization
     FILE_PATH = f'{path}/db.sqlite3'
     DB_URI = 'sqlite+pysqlite:///{file_path}'
     db_config = {

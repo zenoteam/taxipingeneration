@@ -5,6 +5,7 @@ from unittest.mock import ANY
 import http.client
 from freezegun import freeze_time
 from faker import Faker
+
 fake = Faker()
 
 
@@ -12,9 +13,8 @@ fake = Faker()
 def test_create_pin(client):
     new_pin = {
         'username': fake.name(),
-        'admin': fake.name(),
         'phone_number': fake.text(13),
-        'email': 'tonystark2@gmail.com'
+        'email': fake.email()
     }
     response = client.post('/api/genpin/', data=new_pin)
     result = response.json
@@ -24,7 +24,6 @@ def test_create_pin(client):
     expected = {
         'id': ANY,
         'username': new_pin['username'],
-        'admin': new_pin['admin'],
         'expiry_time': '2019-05-07T13:57:34',
         'pin': ANY
     }
@@ -34,19 +33,15 @@ def test_create_pin(client):
 def test_checkpin(client):
     new_pin = {
         'username': fake.name(),
-        'admin': fake.name(),
         'phone_number': fake.text(13),
-        'email': 'tonystark2@gmail.com'
+        'email': fake.email()
     }
     response = client.post('/api/genpin/', data=new_pin)
     result = response.json
 
     assert http.client.CREATED == response.status_code
 
-    check_pin = {
-        'username': new_pin['admin'],
-        'pin': result['pin']
-    }
+    check_pin = {'username': new_pin['username'], 'pin': result['pin']}
 
     response = client.post('/api/checkpin/', data=check_pin)
     result = response.json
@@ -86,21 +81,17 @@ def test_expiredpin(client):
 
 def test_wrong_pin(client):
     new_pin = {
-            'username': fake.name(),
-            'phone_number': fake.text(13),
-            'admin': fake.name(),
-            'email': 'tonystark2@mail.com'
-        }
+        'username': fake.name(),
+        'phone_number': fake.text(13),
+        'email': fake.email()
+    }
     # result = ''
 
     response = client.post('/api/genpin/', data=new_pin)
 
     assert http.client.CREATED == response.status_code
 
-    check_pin = {
-        'username': new_pin['admin'],
-        'pin': '00000'
-    }
+    check_pin = {'username': new_pin['username'], 'pin': '00000'}
 
     response = client.post('/api/checkpin/', data=check_pin)
     # result = response.json
@@ -110,19 +101,15 @@ def test_wrong_pin(client):
 def test_check_used_pin(client):
     new_pin = {
         'username': fake.name(),
-        'admin': fake.name(),
         'phone_number': fake.text(13),
-        'email': 'tonystark2@mail.com'
+        'email': fake.email()
     }
     response = client.post('/api/genpin/', data=new_pin)
     result = response.json
 
     assert http.client.CREATED == response.status_code
 
-    check_pin = {
-        'username': new_pin['admin'],
-        'pin': result['pin']
-    }
+    check_pin = {'username': new_pin['username'], 'pin': result['pin']}
 
     response = client.post('/api/checkpin/', data=check_pin)
     result = response.json
@@ -134,3 +121,24 @@ def test_check_used_pin(client):
     response = client.post('/api/checkpin/', data=check_pin)
     result = response.json
     assert http.client.UNAUTHORIZED == response.status_code
+
+
+def test_bad_request(client):
+    new_pin = {'username': fake.name()}
+    response = client.post('/api/genpin/', data=new_pin)
+
+    assert http.client.BAD_REQUEST == response.status_code
+
+
+def test_bad_request(client):
+    new_pin = {
+        'username': fake.name(),
+        'phone_number': fake.text(13),
+        'email': fake.email()
+    }
+    response = client.post('/api/genpin/', data=new_pin)
+    response = client.post('/api/genpin/', data=new_pin)
+    response = client.post('/api/genpin/', data=new_pin)
+    response = client.post('/api/genpin/', data=new_pin)
+
+    assert http.client.CREATED == response.status_code
