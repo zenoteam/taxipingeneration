@@ -1,3 +1,4 @@
+import os
 import http.client
 import requests
 from datetime import datetime, timedelta
@@ -8,7 +9,9 @@ from generatepins_backend.pin_generator import gen_digits
 
 api_namespace = Namespace('api', description='API operations')
 
-SEND_PIN_MSG_URL = "http://165.22.116.11:7058/api/messages/genpin/"
+SEND_PIN_MSG_URL = os.environ.get(
+    "SEND_PIN_MSG_URL",
+    "http://host.docker.internal:7002/api/me/messageworker/")
 
 # Input and output formats for Generatepins
 
@@ -51,7 +54,7 @@ class GenPin(Resource):
     @api_namespace.expect(genpin_parser)
     def post(self):
         '''
-        Creates A Pin that gives users the ability to create new_passowrd
+        Creates A Pin that gives users the ability to create new_password
         '''
         args = genpin_parser.parse_args()
 
@@ -91,15 +94,33 @@ class GenPin(Resource):
         email = args['email']
 
         data = None
-        if email:
+
+        message = f"""Here is your pin {pin}.
+                    Please note it expires in 10 minutes."""
+        if email and phone_num:
             data = {
-                'username': username,
-                'receiverNo': phone_num,
-                'pin': pin,
-                'receiverEmail': email
+                '_type': 0,
+                'email': email,
+                'phoneNumber': phone_num,
+                'message': message,
+                'subject': "Your OTP",
+                'typeMessage': 'Pin Generation'
             }
-        if phone_num:
-            data = {'username': username, 'receiverNo': phone_num, 'pin': pin}
+        elif phone_num:
+            data = {
+                '_type': 1,
+                'phoneNumber': phone_num,
+                'message': message,
+                'typeMessage': 'Pin Generation'
+            }
+        elif email:
+            data = {
+                '_type': 2,
+                'email': email,
+                'message': message,
+                'subject': "Your OTP",
+                'typeMessage': 'Pin Generation'
+            }
 
         if not data:
             return {
