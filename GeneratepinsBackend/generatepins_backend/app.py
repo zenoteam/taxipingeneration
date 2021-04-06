@@ -2,8 +2,9 @@ from flask import Flask
 from flask_restplus import Api
 
 
+
 def create_app():
-    from generatepins_backend.api_namespace import api_namespace
+    from generatepins_backend.api_namespace.api import api_namespace
 
     application = Flask(__name__)
     api = Api(application, version='0.1', title='Generatepins Backend API',

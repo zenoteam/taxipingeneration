@@ -36,7 +36,7 @@ RUN  /opt/code/db/postgres-setup.sh
 
 ## Install our code to prepare the DB
 ADD ./GeneratepinsBackend/requirements.txt /opt/code
-#pip install --default-timeout=1000
+
 RUN pip3 install -r requirements.txt
 
 ## Need to import all the code, due dependencies to initialise the DB
