@@ -27,7 +27,7 @@ checkpin_parser.add_argument('pin',
 checkpin_parser.add_argument('type',
                              type=int,
                              required=True,
-                             help='The Pin sent to user')
+                             help='0 -> ForgetPassword, 1 -> Normal Gen Pin')
 
 genpin_parser = api_namespace.parser()
 genpin_parser.add_argument('username',
@@ -262,8 +262,6 @@ class CheckPin(Resource):
         }
         
         res = requests.post(url=auth_service, params=data)
-        print(auth_service)
-        print(res.status_code)
         data = res.json()
         
         auth_token = data["Authorized"]
