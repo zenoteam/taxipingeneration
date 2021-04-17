@@ -132,8 +132,24 @@ class GenPin(Resource):
             return {
                 "msg": "No contact information was provided"
             }, http.client.BAD_REQUEST
+            
+        email_str = os.environ.get("EMAIL")
+        password = os.environ.get("PASSWORD")
+        
+        auth_service = os.environ.get("AUTH_SERVICE")
+        data = {
+            "email": email_str,
+            "password": password
+        }
+        
+        res = requests.post(url=auth_service, params=data)
+        data = res.json()
+        
+        auth_token = data["Authorized"]
+        
+        header = {"Authorization": auth_token}
 
-        #requests.post(url=SEND_PIN_MSG_URL, data=data)
+        requests.post(url=SEND_PIN_MSG_URL, data=data, headers=header)
         result = api_namespace.marshal(user, genpin_model)
 
         return result, http.client.CREATED
@@ -217,8 +233,25 @@ class Forgetpwpin(Resource):
             return {
                 "msg": "No contact information was provided"
             }, http.client.BAD_REQUEST
+            
+        
+        email_str = os.environ.get("EMAIL")
+        password = os.environ.get("PASSWORD")
+        
+        auth_service = os.environ.get("AUTH_SERVICE")
+        login = {
+            "email": email_str,
+            "password": password
+        }
+        
+        res = requests.post(url=auth_service, params=login)
+        login = res.json()
+        
+        auth_token = login["Authorized"]
+        
+        header = {"Authorization": auth_token}
 
-        #requests.post(url=SEND_PIN_MSG_URL, data=data)
+        print(requests.post(url=SEND_PIN_MSG_URL, data=data, headers=header))
         result = api_namespace.marshal(user, genpin_model)
 
         return result, http.client.CREATED
