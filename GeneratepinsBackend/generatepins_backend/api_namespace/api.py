@@ -101,10 +101,9 @@ class GenPin(Resource):
 
         data = None
 
-        message = f"""Here is your pin {pin}.
-                    Please note it expires in 10 minutes."""
+        message = f"""Here is your pin {pin}. Please note it expires in 10 minutes."""
         if email and phone_num:
-            data = {
+            data_msg = {
                 '_type': 0,
                 'email': email,
                 'phoneNumber': phone_num,
@@ -113,14 +112,14 @@ class GenPin(Resource):
                 'typeMessage': 'Pin Generation'
             }
         elif phone_num:
-            data = {
+            data_msg = {
                 '_type': 1,
                 'phoneNumber': phone_num,
                 'message': message,
                 'typeMessage': 'Pin Generation'
             }
         elif email:
-            data = {
+            data_msg = {
                 '_type': 2,
                 'email': email,
                 'message': message,
@@ -128,7 +127,7 @@ class GenPin(Resource):
                 'typeMessage': 'Pin Generation'
             }
 
-        if not data:
+        if not data_msg:
             return {
                 "msg": "No contact information was provided"
             }, http.client.BAD_REQUEST
@@ -149,7 +148,9 @@ class GenPin(Resource):
         
         header = {"Authorization": auth_token}
 
-        requests.post(url=SEND_PIN_MSG_URL, data=data, headers=header)
+        res = requests.post(url=SEND_PIN_MSG_URL, data=data_msg, headers=header)
+        print(res.status_code)
+        print(res.json())
         result = api_namespace.marshal(user, genpin_model)
 
         return result, http.client.CREATED
@@ -202,10 +203,9 @@ class Forgetpwpin(Resource):
 
         data = None
 
-        message = f"""Here is your pin {pin}.
-                    Please note it expires in 10 minutes."""
+        message = f"""Here is your pin {pin}. Please note it expires in 10 minutes."""
         if email and phone_num:
-            data = {
+            data_msg = {
                 '_type': 0,
                 'email': email,
                 'phoneNumber': phone_num,
@@ -214,14 +214,14 @@ class Forgetpwpin(Resource):
                 'typeMessage': 'Pin Generation'
             }
         elif phone_num:
-            data = {
+            data_msg = {
                 '_type': 1,
                 'phoneNumber': phone_num,
                 'message': message,
                 'typeMessage': 'Pin Generation'
             }
         elif email:
-            data = {
+            data_msg = {
                 '_type': 2,
                 'email': email,
                 'message': message,
@@ -229,7 +229,7 @@ class Forgetpwpin(Resource):
                 'typeMessage': 'Pin Generation'
             }
 
-        if not data:
+        if not data_msg:
             return {
                 "msg": "No contact information was provided"
             }, http.client.BAD_REQUEST
@@ -251,7 +251,9 @@ class Forgetpwpin(Resource):
         
         header = {"Authorization": auth_token}
 
-        print(requests.post(url=SEND_PIN_MSG_URL, data=data, headers=header))
+        res = requests.post(url=SEND_PIN_MSG_URL, data=data_msg, headers=header)
+        print(res.status_code)
+        print(res.json())
         result = api_namespace.marshal(user, genpin_model)
 
         return result, http.client.CREATED
