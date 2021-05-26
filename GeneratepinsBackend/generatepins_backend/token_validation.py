@@ -3,18 +3,20 @@ from datetime import datetime, timedelta
 
 import jwt
 from parse import parse
+from generatepins_backend.constants import SECRETS
 
 logger = logging.getLogger(__name__)
 
-def encode_token(payload, private_key):
-    return jwt.encode(payload, private_key, algorithm='RS256')
+
+def encode_token(payload, secret):
+    return jwt.encode(payload, secret, algorithm='HS256')
 
 
-def decode_token(token, public_key):
-    return jwt.decode(token, public_key, algoritms='RS256')
+def decode_token(token, secret):
+    return jwt.decode(token, secret, algoritms='HS256')
 
 
-def generate_token_header(payload1, private_key):
+def generate_token_header(payload1, secret):
     """
     Generate a token header base on the username. Sign using the private key.
     """
@@ -22,7 +24,8 @@ def generate_token_header(payload1, private_key):
         'id': payload1['id'],
         'iat': datetime.utcnow(),
         'exp': datetime.utcnow() + timedelta(days=2),
-        'jti': '{0}-{1}'.format(payload1['id'], int(datetime.utcnow().timestamp()))
+        'jti': '{0}-{1}'.format(payload1['id'],
+                                int(datetime.utcnow().timestamp()))
     }
 
     # indicate that user is a (super) admin
@@ -30,12 +33,12 @@ def generate_token_header(payload1, private_key):
         if payload1['admin'] is not None:
             payload['admin'] = payload1['admin']
 
-    token = encode_token(payload, private_key)
+    token = encode_token(payload, secret)
     token = token.decode('utf8')
     return f'Bearer {token}'
 
 
-def validate_token_header(header, public_key):
+def validate_token_header(header, secret):
     """
     Validate that a token header is correct
 
@@ -53,7 +56,7 @@ def validate_token_header(header, public_key):
         return None
     token = parse_result[0]
     try:
-        decoded_token = decode_token(token.encode('utf8'), public_key)
+        decoded_token = decode_token(token.encode('utf8'), secret)
     except jwt.exceptions.DecodeError:
         logger.warning(f'Error decoding header "{header}". '
                        'This may be key mismatch or wrong key')
@@ -74,4 +77,3 @@ def validate_token_header(header, public_key):
 
     logger.info('Header successfully validated')
     return decoded_token
-
