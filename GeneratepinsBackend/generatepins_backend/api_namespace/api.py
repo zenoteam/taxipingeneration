@@ -95,7 +95,7 @@ class GenPin(Resource):
         else:
             response = {
                 "status": "error",
-                "message": "No email or phone_number provided"
+                "msg": "No email or phone_number provided"
             }
             return response, http.client.OK
 
@@ -107,7 +107,7 @@ class GenPin(Resource):
                     return {
                         "status":
                         "error",
-                        "message":
+                        "msg":
                         "You have been barred from genrating an otp for 7 days"
                     }, http.client.OK
                 else:
@@ -136,13 +136,13 @@ class GenPin(Resource):
 
         data = None
 
-        message = f""Here is your pin {pin}. Please note it expires in 10 minutes.""
+        msg = f""Here is your pin {pin}. Please note it expires in 10 minutes.""
         if email and phone_num:
             data_msg = {
                 '_type': 0,
                 'email': email,
                 'phoneNumber': phone_num,
-                'message': message,
+                'msg': msg,
                 'subject': "Your OTP",
                 'typeMessage': 'Pin Generation'
             }
@@ -150,14 +150,14 @@ class GenPin(Resource):
             data_msg = {
                 '_type': 1,
                 'phoneNumber': phone_num,
-                'message': message,
+                'msg': msg,
                 'typeMessage': 'Pin Generation'
             }
         elif email:
             data_msg = {
                 '_type': 2,
                 'email': email,
-                'message': message,
+                'msg': msg,
                 'subject': "Your OTP",
                 'typeMessage': 'Pin Generation'
             }
@@ -235,7 +235,7 @@ class Forgetpwpin(Resource):
         else:
             response = {
                 "status": "error",
-                "message": "No email or phone_number provided"
+                "msg": "No email or phone_number provided"
             }
             return response, http.client.OK
 
@@ -274,13 +274,13 @@ class Forgetpwpin(Resource):
 
         data = None
 
-        message = f""Here is your pin {pin}. Please note it expires in 10 minutes.""
+        msg = f""Here is your pin {pin}. Please note it expires in 10 minutes.""
         if email and phone_num:
             data_msg = {
                 '_type': 0,
                 'email': email,
                 'phoneNumber': phone_num,
-                'message': message,
+                'msg': msg,
                 'subject': "Your OTP",
                 'typeMessage': 'Pin Generation'
             }
@@ -288,14 +288,14 @@ class Forgetpwpin(Resource):
             data_msg = {
                 '_type': 1,
                 'phoneNumber': phone_num,
-                'message': message,
+                'msg': msg,
                 'typeMessage': 'Pin Generation'
             }
         elif email:
             data_msg = {
                 '_type': 2,
                 'email': email,
-                'message': message,
+                'msg': msg,
                 'subject': "Your OTP",
                 'typeMessage': 'Pin Generation'
             }
@@ -363,32 +363,29 @@ class CheckPin(Resource):
         else:
             response = {
                 "status": "error",
-                "message": "No email or phone_number provided"
+                "msg": "No email or phone_number provided"
             }
             return response, http.client.OK
 
         if not user:
             return {
                 "status": "error",
-                "message": "Pin was not generated for this user"
+                "msg": "Pin was not generated for this user"
             }, http.client.OK
 
         if user.verified:
             return {
                 "status": "error",
-                "message": "Pin has been verified"
+                "msg": "Pin has been verified"
             }, http.client.OK
 
         if user.pin != args['pin']:
-            return {
-                "status": "error",
-                "message": "Pin invalid"
-            }, http.client.OK
+            return {"status": "error", "msg": "Pin invalid"}, http.client.OK
 
         if user.expiry_time < datetime.utcnow():
             return {
                 "status": "error",
-                "message": "Pin has expired"
+                "msg": "Pin has expired"
             }, http.client.OK
 
         user.verified = True
@@ -453,20 +450,20 @@ class CheckPin(Resource):
         else:
             response = {
                 "status": "error",
-                "message": "No email or phone_number provided"
+                "msg": "No email or phone_number provided"
             }
             return response, http.client.OK
 
         if not user:
             return {
                 "status": "error",
-                "message": "Pin was not generated for this user"
+                "msg": "Pin was not generated for this user"
             }, http.client.OK
 
         if not user.verified:
             return {
                 "status": "error",
-                "message": "Pin has not been verifed"
+                "msg": "Pin has not been verifed"
             }, http.client.OK
 
         return {"status": "ok", "data": True}, http.client.OK
