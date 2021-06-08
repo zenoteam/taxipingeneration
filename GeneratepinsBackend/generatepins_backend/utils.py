@@ -25,17 +25,14 @@ def validate_phone_number(phone_number):
     first_three = phone_number[:3]
 
     if first_three not in PREFIX_LIST and first_three != "+23":
-        response = {
-            "status": "error",
-            "message": "Pass in a valid phone-number"
-        }
+        response = {"status": "error", "msg": "Pass in a valid phone-number"}
         return {"valid": False, "data": (response, http.client.OK)}
 
     if not (len(phone_number) == 11 or len(phone_number) == 14):
 
         response = {
             "status": "error",
-            "message": "The lenth of number passed is invalid"
+            "msg": "The lenth of number passed is invalid"
         }
         return {"valid": False, "data": (response, http.client.OK)}
 
@@ -45,7 +42,7 @@ def validate_phone_number(phone_number):
         if temp_three not in PREFIX_LIST:
             response = {
                 "status": "error",
-                "message": "Pass in a valid Phone Number"
+                "msg": "Pass in a valid Phone Number"
             }
             return {"valid": False, "data": (response, http.client.OK)}
 
