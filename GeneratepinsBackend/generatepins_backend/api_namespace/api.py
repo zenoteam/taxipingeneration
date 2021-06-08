@@ -9,6 +9,7 @@ from generatepins_backend.models import PinGenModel
 from generatepins_backend.constants import VALIDATE_EMAIL_DOMAINS
 from generatepins_backend.db import db
 from generatepins_backend.pin_generator import gen_digits
+from generatepins_backend.queue import publish_message
 from generatepins_backend.utils import phone_number_, validate_phone_number
 
 api_namespace = Namespace(name="Pin Generation V1.1",
@@ -130,69 +131,36 @@ class GenPin(Resource):
 
             db.session.add(user)
             db.session.commit()
-        """phone_num = args['phone_number']
 
-        email = args['email']
+        data_msg = None
 
-        data = None
+        phone_number = args["phone_number"]
 
-        msg = f""Here is your pin {pin}. Please note it expires in 10 minutes.""
-        if email and phone_num:
+        if email:
             data_msg = {
-                '_type': 0,
-                'email': email,
-                'phoneNumber': phone_num,
-                'msg': msg,
-                'subject': "Your OTP",
-                'typeMessage': 'Pin Generation'
+                "type": "E1M",
+                "email": email,
+                "subject": "Your OTP",
+                "data": {
+                    "pin": pin
+                }
             }
-        elif phone_num:
+            publish_message(data_msg)
+
+        if phone_number:
             data_msg = {
-                '_type': 1,
-                'phoneNumber': phone_num,
-                'msg': msg,
-                'typeMessage': 'Pin Generation'
+                'type': "S1M",
+                'phone_number': phone_number,
+                "data": {
+                    "pin": pin
+                }
             }
-        elif email:
-            data_msg = {
-                '_type': 2,
-                'email': email,
-                'msg': msg,
-                'subject': "Your OTP",
-                'typeMessage': 'Pin Generation'
-            }
+            publish_message(data_msg)
 
         if not data_msg:
             return {
                 "msg": "No contact information was provided"
             }, http.client.BAD_REQUEST
-
-        email_str = os.environ.get("EMAIL")
-        password = os.environ.get("PASSWORD")
-
-        auth_service = os.environ.get("AUTH_SERVICE")
-        data = {"email": email_str, "password": password}
-
-        res = requests.post(url=auth_service, params=data)
-        data = res.json()
-        if data.status_code == 200:
-
-            try:
-                auth_token = data["Authorized"]
-
-                header = {"Authorization": auth_token}
-
-                res = requests.post(url=SEND_PIN_MSG_URL,
-                                    data=data_msg,
-                                    headers=header)
-                print(res.status_code)
-                print(res.json())
-
-            except KeyError:
-                print("Could not send email")
-
-        else:
-            pass"""
 
         result = api_namespace.marshal(user, genpin_model)
 
@@ -268,61 +236,36 @@ class Forgetpwpin(Resource):
 
             db.session.add(user)
             db.session.commit()
-        """phone_num = args['phone_number']
 
-        email = args['email']
+        data_msg = None
 
-        data = None
+        phone_number = args["phone_number"]
 
-        msg = f""Here is your pin {pin}. Please note it expires in 10 minutes.""
-        if email and phone_num:
+        if email:
             data_msg = {
-                '_type': 0,
-                'email': email,
-                'phoneNumber': phone_num,
-                'msg': msg,
-                'subject': "Your OTP",
-                'typeMessage': 'Pin Generation'
+                "type": "E1M",
+                "email": email,
+                "subject": "Your OTP",
+                "data": {
+                    "pin": pin
+                }
             }
-        elif phone_num:
+            publish_message(data_msg)
+
+        if phone_number:
             data_msg = {
-                '_type': 1,
-                'phoneNumber': phone_num,
-                'msg': msg,
-                'typeMessage': 'Pin Generation'
+                'type': "S1M",
+                'phone_number': phone_number,
+                "data": {
+                    "pin": pin
+                }
             }
-        elif email:
-            data_msg = {
-                '_type': 2,
-                'email': email,
-                'msg': msg,
-                'subject': "Your OTP",
-                'typeMessage': 'Pin Generation'
-            }
+            publish_message(data_msg)
 
         if not data_msg:
             return {
                 "msg": "No contact information was provided"
             }, http.client.BAD_REQUEST
-
-        email_str = os.environ.get("EMAIL")
-        password = os.environ.get("PASSWORD")
-
-        auth_service = os.environ.get("AUTH_SERVICE")
-        login = {"email": email_str, "password": password}
-
-        res = requests.post(url=auth_service, params=login)
-        login = res.json()
-
-        auth_token = login["Authorized"]
-
-        header = {"Authorization": auth_token}
-
-        res = requests.post(url=SEND_PIN_MSG_URL,
-                            data=data_msg,
-                            headers=header)
-        print(res.status_code)
-        print(res.json())"""
 
         result = api_namespace.marshal(user, genpin_model)
 

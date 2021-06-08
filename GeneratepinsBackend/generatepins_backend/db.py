@@ -13,12 +13,12 @@ env_path = work_path / 'environment.env'
 load_dotenv(env_path)
 
 db_params = {
-        'host': os.environ['POSTGRES_HOST'],
-        'database': os.environ['POSTGRES_DB'],
-        'user': os.environ['POSTGRES_USER'],
-        'pwd': os.environ['POSTGRES_PASSWORD'],
-        'port': os.environ['POSTGRES_PORT'],
-    }
+    'host': os.environ['POSTGRES_HOST'],
+    'database': os.environ['POSTGRES_DB'],
+    'user': os.environ['POSTGRES_USER'],
+    'pwd': os.environ['POSTGRES_PASSWORD'],
+    'port': os.environ['POSTGRES_PORT'],
+}
 print(db_params)
 DB_URI = 'postgresql://{user}:{pwd}@{host}:{port}/{database}'
 db_config = {
@@ -26,6 +26,24 @@ db_config = {
     'SQLALCHEMY_TRACK_MODIFICATIONS': False,
 }
 print(db_config)
+
+MQ_HOST: str = os.environ.get("MQ_HOST")
+
+MQ_PORT = os.environ.get("MQ_PORT")
+
+VIRTUAL_HOST: str = os.environ.get("VIRTUAL_HOST")
+
+USERNAME: str = os.environ.get("USERNAME")
+
+PASSWORD: str = os.environ.get("PASSWORD")
+
+MSG_QUEUE: str = os.environ.get("MSG_QUEUE")
+MAIL_QUEUE: str = os.environ.get("MAIL_QUEUE")
+MSG_KEY: str = os.environ.get("MSG_KEY")
+MAIL_KEY: str = os.environ.get("MAIL_KEY")
+
+WORKER_KEY: str = os.environ.get("WORKER_KEY")
+WORKER_QUEUE: str = os.environ.get("WORKER_QUEUE")
 
 DATABASE_ENGINE = os.environ.get('DATABASE_ENGINE', 'SQLITE')
 
